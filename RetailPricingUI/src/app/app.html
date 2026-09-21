@@ -1,0 +1,563 @@
+<div class="app-container">
+
+  <!-- ============================= -->
+  <!-- Header -->
+  <!-- ============================= -->
+
+  <header class="app-header">
+
+    <div class="header-content">
+
+      <div>
+        <div class="eyebrow">
+          RETAIL PRICING PLATFORM
+        </div>
+
+        <h1>
+          Retail Pricing Management
+        </h1>
+
+        <p>
+          Upload, search and manage retail pricing records
+        </p>
+      </div>
+
+      <div class="header-badge">
+        Pricing Admin
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <main class="content">
+
+
+    <!-- ============================= -->
+    <!-- Status Messages -->
+    <!-- ============================= -->
+
+    @if (successMessage) {
+
+      <div class="status-message success-message">
+        <span class="status-icon">✓</span>
+
+        <span>
+          {{ successMessage }}
+        </span>
+      </div>
+
+    }
+
+
+    @if (errorMessage) {
+
+      <div class="status-message error-message">
+        <span class="status-icon">!</span>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+      </div>
+
+    }
+
+
+    <!-- ============================= -->
+    <!-- Upload Section -->
+    <!-- ============================= -->
+
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+
+          <div class="section-number">
+            01
+          </div>
+
+          <div>
+            <h2>Upload Pricing Feed</h2>
+
+            <p class="section-description">
+              Upload a CSV file containing retail pricing information.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="upload-area">
+
+        <div class="file-section">
+
+          <label class="file-label">
+            Select CSV file
+          </label>
+
+          <input
+            type="file"
+            accept=".csv"
+            (change)="onFileSelected($event)"
+          />
+
+          @if (selectedFile) {
+
+            <div class="selected-file">
+
+              <span class="file-icon">
+                CSV
+              </span>
+
+              <span class="file-name">
+                {{ selectedFile.name }}
+              </span>
+
+            </div>
+
+          }
+
+        </div>
+
+
+        <div class="upload-action">
+
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="!selectedFile || isUploading"
+            (click)="uploadCsv()"
+          >
+
+            @if (isUploading) {
+
+              <span>
+                Uploading...
+              </span>
+
+            } @else {
+
+              <span>
+                Upload CSV
+              </span>
+
+            }
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ============================= -->
+    <!-- Search Section -->
+    <!-- ============================= -->
+
+    <section class="card">
+
+      <div class="section-title-row">
+
+        <div class="section-number">
+          02
+        </div>
+
+        <div>
+
+          <h2>
+            Search Pricing Records
+          </h2>
+
+          <p class="section-description">
+            Search by Store ID, SKU or Product Name.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="search-grid">
+
+
+        <!-- Store ID -->
+
+        <div class="form-group">
+
+          <label>
+            Store ID
+          </label>
+
+          <input
+            type="text"
+            name="storeId"
+            placeholder="Enter Store ID"
+            [(ngModel)]="searchStoreId"
+          />
+
+        </div>
+
+
+        <!-- SKU -->
+
+        <div class="form-group">
+
+          <label>
+            SKU
+          </label>
+
+          <input
+            type="text"
+            name="sku"
+            placeholder="Enter SKU"
+            [(ngModel)]="searchSku"
+          />
+
+        </div>
+
+
+        <!-- Product Name -->
+
+        <div class="form-group">
+
+          <label>
+            Product Name
+          </label>
+
+          <input
+            type="text"
+            name="productName"
+            placeholder="Enter Product Name"
+            [(ngModel)]="searchProductName"
+          />
+
+        </div>
+
+
+        <!-- Buttons -->
+
+        <div class="search-actions">
+
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="isSearching"
+            (click)="searchRecords()"
+          >
+
+            @if (isSearching) {
+              Searching...
+            } @else {
+              Search
+            }
+
+          </button>
+
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="clearSearch()"
+          >
+            Clear
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ============================= -->
+    <!-- Pricing Records -->
+    <!-- ============================= -->
+
+    <section class="card">
+
+      <div class="records-header">
+
+        <div>
+
+          <div class="section-title-row">
+
+            <div class="section-number">
+              03
+            </div>
+
+            <div>
+
+              <h2>
+                Pricing Records
+              </h2>
+
+              <p class="section-description">
+                Review and update pricing information.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="record-count">
+
+          {{ pricingRecords.length }}
+
+          @if (pricingRecords.length === 1) {
+            record
+          } @else {
+            records
+          }
+
+        </div>
+
+      </div>
+
+
+
+      <!-- Table -->
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>ID</th>
+
+              <th>Store ID</th>
+
+              <th>SKU</th>
+
+              <th>Product Name</th>
+
+              <th>Price</th>
+
+              <th>Price Date</th>
+
+              <th>Action</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @if (pricingRecords.length === 0) {
+
+              <tr>
+
+                <td
+                  colspan="7"
+                  class="no-records"
+                >
+
+                  <div class="empty-state">
+
+                    <div class="empty-icon">
+                      —
+                    </div>
+
+                    <div>
+                      No pricing records found
+                    </div>
+
+                    <small>
+                      Upload a CSV file or change your search criteria.
+                    </small>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            } @else {
+
+
+              @for (
+                record of pricingRecords;
+                track record.pricingId
+              ) {
+
+                <tr>
+
+
+                  <!-- ===================== -->
+                  <!-- EDIT MODE -->
+                  <!-- ===================== -->
+
+                  @if (
+                    editingRecordId === record.pricingId
+                    && editRecordData
+                  ) {
+
+
+                    <td class="id-cell">
+                      {{ record.pricingId }}
+                    </td>
+
+
+                    <td>
+
+                      <input
+                        class="table-input"
+                        type="text"
+                        [(ngModel)]="editRecordData.storeId"
+                      />
+
+                    </td>
+
+
+                    <td>
+
+                      <input
+                        class="table-input"
+                        type="text"
+                        [(ngModel)]="editRecordData.sku"
+                      />
+
+                    </td>
+
+
+                    <td>
+
+                      <input
+                        class="table-input product-input"
+                        type="text"
+                        [(ngModel)]="editRecordData.productName"
+                      />
+
+                    </td>
+
+
+                    <td>
+
+                      <input
+                        class="table-input price-input"
+                        type="number"
+                        step="0.01"
+                        [(ngModel)]="editRecordData.price"
+                      />
+
+                    </td>
+
+
+                    <td>
+
+                      <input
+                        class="table-input"
+                        type="date"
+                        [(ngModel)]="editRecordData.priceDate"
+                      />
+
+                    </td>
+
+
+                    <td class="action-cell">
+
+                      <button
+                        type="button"
+                        class="save-button"
+                        [disabled]="isSaving"
+                        (click)="saveRecord()"
+                      >
+
+                        @if (isSaving) {
+                          Saving...
+                        } @else {
+                          Save
+                        }
+
+                      </button>
+
+
+                      <button
+                        type="button"
+                        class="cancel-button"
+                        [disabled]="isSaving"
+                        (click)="cancelEdit()"
+                      >
+                        Cancel
+                      </button>
+
+                    </td>
+
+                  }
+
+
+                  <!-- ===================== -->
+                  <!-- VIEW MODE -->
+                  <!-- ===================== -->
+
+                  @else {
+
+                    <td class="id-cell">
+                      {{ record.pricingId }}
+                    </td>
+
+                    <td>
+                      {{ record.storeId }}
+                    </td>
+
+                    <td>
+                      {{ record.sku }}
+                    </td>
+
+                    <td class="product-name">
+                      {{ record.productName }}
+                    </td>
+
+                    <td class="price-cell">
+                      {{ record.price | number:'1.2-2' }}
+                    </td>
+
+                    <td>
+                      {{ record.priceDate.substring(0, 10) }}
+                    </td>
+
+                    <td class="action-cell">
+
+                      <button
+                        type="button"
+                        class="edit-button"
+                        (click)="editRecord(record)"
+                      >
+                        Edit
+                      </button>
+
+                    </td>
+
+                  }
+
+                </tr>
+
+              }
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
